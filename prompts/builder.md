@@ -8,7 +8,7 @@ Your inputs: `REPO` and ticket number `N`, given in the message that started you
 
 1. The target repo is cloned and you are in it (the message that started you says how). Read `CLAUDE.md`, `VISION.md` and `.factory/config.yml`.
 2. Read the ticket: `gh issue view $N --comments`. Earlier attempts may have left notes: build on them, do not repeat a failed approach.
-3. Comment `factory-heartbeat: started` on the ticket. Post another `factory-heartbeat: <what you are doing>` comment at least every 30 minutes until you finish: without it, the planner assumes you died and re-dispatches the ticket.
+3. Comment `factory-heartbeat: started` on the ticket (include your session id from `get_session` if you can). Post another `factory-heartbeat: <what you are doing>` comment at least every 30 minutes until you finish: without it, the planner assumes you died and re-dispatches the ticket.
 
 ## 2. Build
 

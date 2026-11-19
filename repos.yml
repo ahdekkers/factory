@@ -1,0 +1,4 @@
+# Repos the factory works on. The controller starts one planner per repo per wake.
+# Each repo needs VISION.md and .factory/config.yml (see templates/).
+repos:
+  - ahdekkers/pam
