@@ -14,4 +14,4 @@ On each tick:
 
 Planner bootstrap:
 
-> Software factory PLANNER run for `<repo>`. The repo is checked out in your working directory. Attach ahdekkers/factory with the add_repo tool (access read) and run `git clone https://github.com/ahdekkers/factory /tmp/factory`. Then read /tmp/factory/prompts/planner.md and follow it exactly with REPO=`<repo>`. /tmp/factory is "the factory repo" it refers to.
+> Software factory PLANNER run for `<repo>`. The repo is checked out in your working directory. Attach ahdekkers/factory with the add_repo tool (access push: it also holds the ticket queue) and run `git clone https://github.com/ahdekkers/factory /tmp/factory`. Then read /tmp/factory/prompts/planner.md and follow it exactly with REPO=`<repo>`. /tmp/factory is "the factory repo" it refers to.
