@@ -33,7 +33,7 @@ The point of this step is to judge the product against the vision with your own 
 
 ## 4. File tickets
 
-- Deploy incidents come first. The deploy workflow files them as `factory:incident` issues in `REPO` itself, where the repo's own automation may already be fixing them. For each one open more than 2 hours with no linked open PR, and no factory ticket yet, file a ticket labelled `factory:incident` that links it; the builder closes both.
+- Deploy incidents come first. The deploy workflow files them as `factory:incident` issues in `REPO` itself. For each open one with no linked open PR and no factory ticket yet, file a ticket labelled `factory:incident` that links it; the builder closes both.
 - Then gaps from step 3, as new issues labelled `factory` and `factory:ready`, until the open ready queue holds about `2 × max_parallel_builders`. Do not flood the queue: the next run will see the result of this run's work and plan better.
 - Each ticket is one small, independently mergeable change (a builder should finish it in under two hours). Body: **Goal** (the behaviour, in user terms), **Acceptance criteria** (checkable in the running app or by tests, including phone viewport where relevant), **Context** (pages, files, screenshots described in words, related tickets), **Out of scope**.
 - A larger direction (e.g. a design system, a new front-end architecture) is fine, but split it into a first ticket that lays the foundation and follow-ups filed in later runs. Note the direction in the log so later runs stay consistent.
