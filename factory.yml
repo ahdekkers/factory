@@ -1,0 +1,6 @@
+# The running pieces of the factory (claude.ai, environment "Full Internet Access", env_012B6jjNXenQTqomjb2mdwok).
+controller_session: session_01S6eMpnLDZ6Q4bQfkyajk7W   # "Factory controller"; follows prompts/controller.md
+tick_trigger: trig_019AYoqcjeQGwB3N2SGYEY4R            # "Factory: hourly tick", :43 every hour, wakes the controller
+# Pause the factory: disable the tick scheduled task. Resume: enable it.
+# If the controller session is lost, start a new one with create_session (source ahdekkers/factory, permission auto,
+# prompt: read prompts/controller.md and follow it for every "factory tick"), then point the tick at it.
