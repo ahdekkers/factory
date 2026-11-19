@@ -5,7 +5,7 @@ The owner describes behaviour in a repo's `VISION.md`. Claude agents do everythi
 ## How it runs
 
 ```
- hourly scheduled task ──"factory tick"──▶ Controller (long-lived session on the Mac Mini, light: no builds)
+ "factory tick" every hour ─────────────▶ Controller (long-lived session on the Mac Mini, light: no builds)
                                              │ per repo in repos.yml: recover dead builders, start builders for
                                              │ factory:ready tickets (up to max_parallel_builders), start a planner
                          ┌───────────────────┴───────────────────┐
@@ -26,7 +26,7 @@ The owner describes behaviour in a repo's `VISION.md`. Claude agents do everythi
 
 ## Running pieces
 
-`factory.yml`: the cloud environment, the controller session and the hourly tick. Pause everything by disabling the tick; running builders finish their ticket.
+`factory.yml`: the cloud environment and the controller session. Each tick schedules the next one (`send_later`), because a recurring scheduled task cannot target a session on the owner's computer. Pause by telling the controller to pause; resume by sending it `factory tick`. Running builders finish their ticket.
 
 ## Onboard a repo
 

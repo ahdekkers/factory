@@ -1,5 +1,6 @@
 # The running pieces of the factory.
 cloud_environment: env_012B6jjNXenQTqomjb2mdwok   # "Full Internet Access": where planners and builders run
-controller_session: null                          # local Remote Control session on the Mac Mini; prompts/controller.md
-tick_trigger: null                                # hourly scheduled task that sends "factory tick" to the controller
-# Pause the factory: disable the tick scheduled task. Resume: enable it.
+controller_session: session_01S6eMpnEjPv1qM8tfjs4dzj   # "Factory controller", a local Remote Control session on the Mac Mini
+# Ticks: each tick schedules the next with send_later ("Factory: next tick", 60 min), so there is no recurring task.
+# Pause: tell the controller session "pause the factory" (it stops scheduling ticks), or disable the pending
+# "Factory: next tick" scheduled task. Resume: send "factory tick" to the controller session.
