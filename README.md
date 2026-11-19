@@ -26,7 +26,7 @@ The owner describes behaviour in a repo's `VISION.md`. Claude agents do everythi
 
 ## Running pieces
 
-`factory.yml`: the cloud environment and the controller session. Each tick schedules the next one (`send_later`), because a recurring scheduled task cannot target a session on the owner's computer. Pause by telling the controller to pause; resume by sending it `factory tick`. Running builders finish their ticket.
+`factory.yml`: the cloud environment and the controller session. Ticks are sent to the controller from outside: a recurring scheduled task cannot target a session on the owner's computer, and the controller may not schedule itself. Pause by telling the controller to pause. Running builders finish their ticket.
 
 ## Onboard a repo
 
