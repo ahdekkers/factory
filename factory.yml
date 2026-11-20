@@ -1,6 +1,15 @@
 # The running pieces of the factory.
 cloud_environment: env_012B6jjNXenQTqomjb2mdwok   # "Full Internet Access": where planners and builders run
-controller_session: session_01S6eMpnEjPv1qM8tfjs4dzj   # "Factory controller", a local Remote Control session on the Mac Mini
-tick_trigger: trig_019vfnZTWHyLgdhwBogeZURN        # "Factory: hourly tick", :11 every hour, sends "factory tick" to the controller
+controller_session: session_01S6eMpoFbmU3mwgcZS6gHnz   # "Factory controller", a local Remote Control session on the Mac Mini (since Nov 20, 2026 13:15 UTC)
+tick_trigger: trig_014xXH1UceNTxCbog7f35334        # "Factory: hourly tick", :17 every hour, sends "factory tick" to the controller
 # The owner created it from the controller session (Nov 20, 2026); the controller may not schedule ticks on its own.
 # Pause: disable that scheduled task, or tell the controller "pause the factory".
+
+# Which model does which job. The controller passes these to every session it starts, so a session never just
+# inherits whatever model the controller happens to run on. A repo's .factory/config.yml may override any of them
+# under its own `models:` key.
+models:
+  planner: claude-opus-5-5     # decides what gets built; a wrong ticket costs far more than the planner run
+  builder: claude-sonnet-5-5   # most of the tokens are spent here; about a third of the Opus cost per ticket
+  reviewer: opus               # the only gate before merge; reads one diff, so it is cheap (Agent tool model name)
+# The controller itself only does bookkeeping: run its session on Haiku (`/model` in that session).

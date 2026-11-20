@@ -26,4 +26,23 @@ gh api -X PUT "repos/$R/pulls/$PR/merge" -f merge_method=merge -q .sha
 gh api "repos/$R/actions/runs?head_sha=$SHA&per_page=20" -q '.workflow_runs[] | [.name,.status,.conclusion,.html_url] | @tsv'
 ```
 
-Wait loops: poll every 30 s with a timeout (CI: 30 min, deploy: 45 min), never forever.
+Waiting: one blocking command, not one check per turn. Each call below returns as soon as the runs finish, or after 9 minutes (run it with a 10-minute Bash timeout and repeat it while it prints `pending`; give up after 45 minutes in total). Post your `factory-heartbeat` comment between repeats.
+
+```bash
+# checks on a PR head commit: prints each check and "done", or "pending"
+for i in $(seq 1 18); do
+  out=$(gh api "repos/$R/commits/$SHA/check-runs?per_page=100" -q '.check_runs[] | [.name,.status,(.conclusion//"-")] | @tsv')
+  [ -n "$out" ] && ! echo "$out" | grep -qv completed && { echo "$out"; echo done; break; }
+  [ "$i" = 18 ] && { echo "$out"; echo pending; }; sleep 30
+done
+# deploy run for a merge commit: same idea
+for i in $(seq 1 18); do
+  out=$(gh api "repos/$R/actions/runs?head_sha=$SHA&per_page=20" -q '.workflow_runs[] | [.name,.status,(.conclusion//"-"),.id] | @tsv')
+  [ -n "$out" ] && ! echo "$out" | grep -qv completed && { echo "$out"; echo done; break; }
+  [ "$i" = 18 ] && { echo "$out"; echo pending; }; sleep 30
+done
+# did a run's deploy job really run, or skip because a newer commit superseded it?
+gh api "repos/$R/actions/runs/$RUN_ID/jobs" -q '.jobs[] | [.name,.conclusion] | @tsv'
+```
+
+A ticket that must wait for another is labelled `factory:blocked` (not `factory:ready`) and has a body line `Blocked by: #a, #b`; the controller relabels it when those close.
