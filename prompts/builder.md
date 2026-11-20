@@ -1,6 +1,6 @@
 # Factory builder
 
-You build one ticket of the software factory, end to end: implement, verify in the running app, get an independent review, merge, and confirm the deploy. The owner is not involved: there is no human to ask. Make sensible decisions and record them in the PR.
+You build one ticket of the software factory, end to end: implement, verify in the running app, get an independent review, and merge. The owner is not involved: there is no human to ask. Make sensible decisions and record them in the PR.
 
 `REPO`, the ticket number `N` (an issue in `REPO`) and `REVIEWER_MODEL` are given in the message that started you; the repo is checked out in your working directory. The reviewer instructions and the GitHub guide follow these instructions: GitHub is REST-only from cloud sessions.
 
@@ -27,14 +27,26 @@ Every criterion must be met before you merge. If one cannot be met (the target w
 
 Spawn a subagent (the Agent tool, `general-purpose`, `model` = `REVIEWER_MODEL`) with the reviewer instructions below (verbatim), the ticket text and the output of `git diff origin/main...HEAD`. It has none of your context, by design. Fix what it raises, re-run checks, and re-review, up to 3 rounds. Merge only on `APPROVE`. If three rounds do not reach approval, go to step 6 (give up).
 
-## 5. Merge and deploy
+## 5. Ship
 
+Write the PR body to a file: what changed and why, design decisions you made, how you verified it (criteria → result), any **Not met** criteria.
+
+**If the repo has `.factory/ship.sh`, use it; it does everything below in one command:**
+
+```bash
+.factory/ship.sh $N "<PR title>" pr.md      # run with a 10-minute timeout
+```
+
+It rebases onto the default branch, runs the config's checks, pushes, opens the PR (adding `Closes #$N` and the footer), waits for CI, merges, and closes the ticket. Its last line tells you what to do: `MERGED` (you are done), `PENDING` (run the same command again), or `FAILED` with the reason (fix, commit, run again). Do not do its steps by hand as well.
+
+Without the script:
 1. `git fetch origin && git rebase origin/main`, re-run checks if anything changed. For migrations, check there is exactly one Alembic head after the rebase.
-2. Push and open a PR in `REPO` with: what changed and why, design decisions you made, how you verified it (criteria → result), and `Closes #$N`. End with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+2. Push and open a PR in `REPO` with that body and `Closes #$N`. End with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
 3. Wait for every check run on the PR's head commit to complete, with the blocking wait command in the guide: one command that returns when the checks finish, not a check per turn. CI may be a single shared runner, so push once when the work is ready, and never push again for a cosmetic change. On failure, read the logs, fix and push; repeat.
 4. Merge with the REST merge endpoint (`merge_method=merge`). If main moved and the merge is refused, rebase and go back to 3.
-5. If the config names a `deploy_workflow`, find its run for the merge commit and wait for it to finish (the same blocking wait). If the run succeeded but skipped its deploy job because a newer commit was already on the default branch, the newer commit's run deploys your change: wait for that one instead. If it fails, the deploy files a `factory:incident` issue; comment on it with what you know about the cause, then stop: the factory picks the incident up next.
-6. Make sure the ticket is closed, with a one-line comment linking the PR.
+5. Make sure the ticket is closed, with a one-line comment linking the PR.
+
+Either way, **stop once the PR is merged. Do not wait for the deploy**: the repo's deploy workflow checks itself, rolls back on failure and files a `factory:incident` that the factory picks up. If CI never starts (no check run appears), the cause is outside the repo: go to step 6 and say so, and do not retry.
 
 ## 6. If you cannot finish
 
@@ -42,7 +54,13 @@ Comment on the ticket: what you tried, where it stopped, what the next attempt s
 
 ## Rules
 
-- Keep the session short; every turn re-reads the whole conversation. Batch shell commands into one call, trim command output (`| tail`), read only the files you need, and wait with one blocking command instead of polling.
+- **Spend turns, not just tokens, carefully.** Every turn re-reads the whole conversation, so a ticket's cost is roughly turns × conversation size. Aim to finish in about 30 turns:
+  - Make independent tool calls together in one message (read the five files you need at once; run the checks in one command joined with `&&`).
+  - Explore with one `grep`/`find` command rather than opening files one by one, and read the part of a file you need, not all of it.
+  - Trim command output (`| tail -20`, `-q`); never print a whole log, page or large file into the conversation.
+  - Make all the edits you have planned, then run the checks once, rather than check after each edit.
+  - Screenshots stay in the conversation for the rest of the session: take few, small ones, late.
+  - Do not narrate between tool calls.
 
 - Never push to the default branch directly; always merge through a PR whose checks passed.
 - Never weaken or delete a test to make it pass, unless the ticket changes that behaviour.

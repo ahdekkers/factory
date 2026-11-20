@@ -58,6 +58,6 @@ Add one comment to the `Factory log` issue, starting `**Planner run <UTC time>**
 ## Rules
 
 - Never change code, push or merge: builders do that.
-- Keep the run short: batch shell commands, do not read files you do not need, and never print whole pages or large files into the conversation.
+- Keep the run short: every turn re-reads the whole conversation. Make independent tool calls together in one message, batch shell commands, do not read files you do not need, and never print whole pages or large files into the conversation.
 - Respect the repo's `CLAUDE.md`. Where it reserves something for the owner (for PAM: approving investment content), no ticket may remove or bypass it.
 - Never put secrets, personal data or real holdings in issues, comments or screenshots.

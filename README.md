@@ -33,7 +33,7 @@ The owner describes behaviour in a repo's `VISION.md`. Claude agents do everythi
 
 ## Onboard a repo
 
-1. Add `VISION.md` and `.factory/config.yml` (copy from `templates/`). The first planner run files a bootstrap ticket for the cloud preview if `cloud_up` does not exist yet.
+1. Write `VISION.md` with the owner (the `factory-vision` skill, which follows `prompts/vision.md`), and add `.factory/config.yml` and `.factory/ship.sh` (copy from `templates/`). The first planner run files a bootstrap ticket for the cloud preview if `cloud_up` does not exist yet.
 2. Give the repo a deploy workflow that rolls back and files a `factory:incident` issue on failure (PAM's `.github/workflows/deploy.yml` is the reference), and turn on "Automatically delete head branches".
 3. Add the repo to `repos.yml`. The next tick starts its planner.
 4. Remove any automation that acts on every new issue in the repo, or make it skip issues labelled `factory`.
@@ -48,7 +48,7 @@ Almost all the cost is cached context re-read on every turn of a builder session
 
 - **Fewer tickets.** Each one carries a fixed cost (setup, review, CI, deploy) whatever its size. A tight Scope and Done-when list is the biggest saving; the planner bundles related fixes into one ticket per page or flow.
 - **Fewer planner runs.** The planner plans the whole remaining distance in one run and is not started again until the queue runs low.
-- **Fewer turns.** Builders wait for CI and deploys with one blocking command, batch shell commands, and verify only the pages their ticket touches.
+- **Fewer turns.** A ticket costs roughly turns × conversation size. Builders make independent tool calls together, verify only the pages their ticket touches, and ship with one command (`.factory/ship.sh`, from `templates/ship.sh`: rebase, checks, push, PR, CI wait, merge, close). They do not wait for the deploy, which checks itself.
 - **Text before images.** Planners and builders measure pages in a script (status, overflow, sizes, visible text) and take screenshots only for what must be judged by eye.
 - **Models per role** (`factory.yml`).
 - **Runner time.** With one self-hosted runner, CI on pull requests only; a deploy run superseded by a newer commit skips itself.
