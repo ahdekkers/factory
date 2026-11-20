@@ -37,7 +37,7 @@ The owner describes behaviour in a repo's `VISION.md`. Claude agents do everythi
 
 ## When is it done?
 
-Each planner run sorts what it sees into significant and minor gaps and files only significant ones. When a run finds no significant gaps and no factory tickets are open, it posts `**Vision met**` (with the `VISION.md` sha) in the Factory log, and the controller stops starting planners for that repo until the owner edits `VISION.md`. Editing the vision restarts the loop.
+Each planner run sorts what it sees into significant and minor gaps and files only significant ones. When a run finds no significant gaps and no factory tickets are open, it posts `**Vision met**` (with the `VISION.md` sha) in the Factory log, and the controller stops starting planners for that repo until the owner edits `VISION.md`. The controller sends the owner one push notification when that happens. Editing the vision restarts the loop.
 
 ## Limits and safety
 
