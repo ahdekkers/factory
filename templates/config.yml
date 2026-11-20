@@ -4,7 +4,7 @@ vision: VISION.md
 daily_ticket_cap: 50            # hard limit on tickets the planner creates per UTC day
 max_parallel_builders: 2
 max_attempts: 3                 # dispatches per ticket before it is labelled factory:stuck
-quiet_hours_utc: null           # e.g. [2, 5]: no planner runs from 02:00 to 04:59 UTC
+quiet_hours_utc: null           # e.g. [2, 5]: no new planners or builders from 02:00 to 04:59 UTC
 checks:                         # every builder runs these; all must pass before a PR
   - make lint
   - make test
