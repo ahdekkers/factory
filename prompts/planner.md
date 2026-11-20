@@ -23,13 +23,23 @@ Judge the product against the vision with your own eyes, not by reading code.
 2. Otherwise run the `cloud_up` script. Visit every page and the important states (empty, loaded, error, long content) with Playwright at a phone viewport (`devices['iPhone 13']`) and at 1440×900. Take screenshots at deviceScaleFactor 1 and look at them. Exercise the main flows, not just page loads.
 3. Note concretely where the product falls short of the vision, worst gaps first: broken behaviour, then anything that blocks the vision's main use, then polish.
 
+## 2b. Is the vision met?
+
+Sort every gap from step 2 into **significant** or **minor**.
+- **Significant:** broken behaviour; anything that blocks or slows the vision's main use; a page or state that is clearly unpolished, or inconsistent with the rest of the app; anything that fails on the phone viewport; an accessibility failure.
+- **Minor:** a taste-level tweak that a careful owner would not notice or would not miss: spacing nudges, alternative wordings, a different but not better layout.
+
+File only significant gaps (step 4). Drop minor ones; do not file them.
+
+If no open `factory` tickets remain (none ready, building or stuck), no incident is open, and this run found no significant gaps, the vision is met. Write the log comment (step 5) starting with exactly `**Vision met**`, then `VISION.md sha: <sha>` (from `gh api repos/<REPO>/contents/VISION.md -q .sha`), then a short summary of the product as it stands and the minor gaps you dropped. The controller then stops starting planners for this repo until the owner changes `VISION.md`. Do not declare it while tickets are still open: their work may change the picture.
+
 ## 3. Incidents
 
 Open issues labelled `factory:incident` (filed by the deploy workflow) are tickets already: add `factory:ready` to any that has neither `factory:ready` nor `factory:building`.
 
 ## 4. File tickets
 
-- File gaps from step 2 as issues labelled `factory` and `factory:ready` until the open ready queue holds about `2 × max_parallel_builders`. Do not flood the queue: the next run sees the result of this run's work and plans better.
+- File the significant gaps from step 2b as issues labelled `factory` and `factory:ready` until the open ready queue holds about `2 × max_parallel_builders`. Do not flood the queue: the next run sees the result of this run's work and plans better.
 - Each ticket is one small, independently mergeable change (a builder should finish it in under two hours). Body: **Goal** (the behaviour, in user terms), **Acceptance criteria** (checkable in the running app or by tests, including the phone viewport where relevant), **Context** (pages, files, what you saw, related tickets), **Out of scope**.
 - A larger direction (a design system, a new front-end architecture) is fine: file the foundation first and follow-ups in later runs, and record the direction in the log so later runs stay consistent.
 - Search open and recently closed `factory` issues before filing, to avoid duplicates. Prefer tickets that touch different areas, so parallel builders do not conflict.

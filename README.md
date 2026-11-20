@@ -35,6 +35,10 @@ The owner describes behaviour in a repo's `VISION.md`. Claude agents do everythi
 3. Add the repo to `repos.yml`. The next tick starts its planner.
 4. Remove any automation that acts on every new issue in the repo, or make it skip issues labelled `factory`.
 
+## When is it done?
+
+Each planner run sorts what it sees into significant and minor gaps and files only significant ones. When a run finds no significant gaps and no factory tickets are open, it posts `**Vision met**` (with the `VISION.md` sha) in the Factory log, and the controller stops starting planners for that repo until the owner edits `VISION.md`. Editing the vision restarts the loop.
+
 ## Limits and safety
 
 - `daily_ticket_cap` per repo; `max_parallel_builders` per repo; `quiet_hours_utc` keep the subscription free for scheduled jobs that matter.
