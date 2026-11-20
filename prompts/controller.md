@@ -8,6 +8,7 @@ You run locally, so the full `gh` CLI works (GraphQL too) with the owner's login
 
 1. `git -C ~/claude-workspace/factory pull --ff-only`, then re-read this file (`prompts/controller.md`): it may have changed. Read `repos.yml`. Then, for each repo:
 2. **Config.** Read `.factory/config.yml` and `VISION.md` from the repo's default branch (`gh api repos/<repo>/contents/.factory/config.yml -H 'Accept: application/vnd.github.raw'`). No config: skip the repo. Ensure these labels exist (`gh label create --force`): `factory`, `factory:ready`, `factory:building`, `factory:stuck`, `factory:incident`, `factory:log`, `factory:bootstrap`.
+   **Quiet hours.** If the config sets `quiet_hours_utc: [start, end]` and the current UTC hour is in `[start, end)`, start no builders and no planner for this repo (they protect the subscription for the repo's own scheduled jobs). Recovery (step 3) still runs, but relabels instead of starting anything.
 3. **Recover builders.** For each open issue labelled `factory:building`:
    - Closed by a merged PR in the meantime: nothing to do.
    - Its latest `factory-session: <id>` comment names the builder. If `get_session` shows it still working, or the issue's latest comment is younger than 90 minutes, leave it.
