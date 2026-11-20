@@ -1,7 +1,6 @@
 # The running pieces of the factory.
 cloud_environment: env_012B6jjNXenQTqomjb2mdwok   # "Full Internet Access": where planners and builders run
 controller_session: session_01S6eMpnEjPv1qM8tfjs4dzj   # "Factory controller", a local Remote Control session on the Mac Mini
-# Ticks: "factory tick" is sent to the controller from outside, hourly. The controller may not schedule its own
-# ticks (the permission check refuses a session keeping itself running). Overnight Nov 19-20, 2026 the setup session
-# sent them; a durable source is an open decision for the owner.
-# Pause: tell the controller "pause the factory". Resume: tell it to resume and send "factory tick".
+tick_trigger: trig_019vfnZTWHyLgdhwBogeZURN        # "Factory: hourly tick", :11 every hour, sends "factory tick" to the controller
+# The owner created it from the controller session (Nov 20, 2026); the controller may not schedule ticks on its own.
+# Pause: disable that scheduled task, or tell the controller "pause the factory".
