@@ -2,3 +2,4 @@
 # Each repo needs VISION.md and .factory/config.yml (see templates/).
 repos:
   - ahdekkers/pam
+  - ahdekkers/marketdata
