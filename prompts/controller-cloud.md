@@ -10,6 +10,14 @@ Read this together with `controller.md`. Where they disagree, this file wins. It
 - **GitHub is REST only.** GraphQL is blocked: `gh issue list`, `gh pr ...` and `gh label` fail. Use `gh api` as in `github.md` for every read and write (it is the same guide builders get). Read a repo's config with `gh api repos/<repo>/contents/.factory/config.yml -H 'Accept: application/vnd.github.raw'`.
 - **Starting sessions** works as in `controller.md` (`create_session` with environment, model, source, prompt). Sessions you start are your children; list them with `list_sessions` (`children: true`). Do not start a builder or planner for a repo if `add_repo` for it failed.
 
+## Event ticks and the lock
+
+Besides the hourly schedule, a tick also starts when a `factory` issue is closed in a repo (a GitHub event). Several can arrive within a minute, so ticks must not overlap:
+
+1. **Run-level lock.** Before anything else, `list_sessions` and look for another session titled like yours (`Factory controller tick`) that is still working and started in the last 10 minutes. If one exists, reply `Nothing to report.` and stop: it will see what you would have seen. The hourly tick is the safety net for anything missed.
+2. **Ticket-level lock.** Before `create_session` for a ticket, relabel it `factory:building`, then re-read its comments. If a `factory-session:` comment already appeared since you started, someone else took it: skip it. Only after `create_session` succeeds, comment `factory-session: <id>`.
+3. **An event tick is a normal tick**, with the same steps and caps. If the event message names the closed issue, it is only a hint: re-read the queue rather than trusting it.
+
 ## Pause
 
 Pause without touching the routine: if `ahdekkers/factory` has an open issue titled `Factory paused`, start nothing, change nothing, and reply `paused`. Close the issue to resume. (Disabling the routine also pauses it.)
