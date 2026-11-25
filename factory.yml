@@ -1,9 +1,9 @@
-# The running pieces of the factory.
-cloud_environment: env_012B6jjNXenQTqomjb2mdwok   # "Full Internet Access": where planners and builders run
-controller_session: session_01S6eMppU8cSsGnpYNF6JzGU   # "Factory Controller" (Haiku), a local Remote Control session on the Mac Mini (since Nov 24, 2026 13:39 UTC; replaced the Nov 20 one)
-tick_trigger: trig_014xXH1UceNTxCbog7f35334        # "Factory: hourly tick", :17 every hour, sends "factory tick" to the controller
-# The owner created it from the controller session (Nov 20, 2026); the controller may not schedule ticks on its own.
-# Pause: disable that scheduled task, or tell the controller "pause the factory".
+# The running pieces of the factory. Replace these ids with your own when you set up a fork (see README, "Set it up").
+cloud_environment: env_012B6jjNXenQTqomjb2mdwok   # cloud environment where planners and builders run (unrestricted network)
+controller_tick: trig_01UXnDfVZcmJmX9rgNtHeH5h    # scheduled task "Factory controller tick": hourly at :17, a fresh Haiku
+                                                  # cloud session per firing, prompt in prompts/tick.md
+# Pause: open an issue titled "Factory paused" in this repo (close it to resume), or disable the scheduled task.
+# Running builders finish their ticket either way.
 
 # Which model does which job. The controller passes these to every session it starts, so a session never just
 # inherits whatever model the controller happens to run on. A repo's .factory/config.yml may override any of them
@@ -12,4 +12,5 @@ models:
   planner: claude-opus-5-5     # decides what gets built; a wrong ticket costs far more than the planner run
   builder: claude-sonnet-5-5   # most of the tokens are spent here; about a third of the Opus cost per ticket
   reviewer: opus               # the only gate before merge; reads one diff, so it is cheap (Agent tool model name)
-# The controller itself only does bookkeeping: run its session on Haiku (`/model` in that session).
+# The controller itself runs on claude-haiku-5-5: it is set on the scheduled task (prompts/tick.md), not here.
+# Writing a vision (skills/factory-vision) happens in your own interactive session, on whatever model you use there.

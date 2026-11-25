@@ -5,7 +5,7 @@ Read this together with `controller.md`. Where they disagree, this file wins. It
 ## What is different
 
 - **You are stateless and one-shot.** Nothing carries over from the last tick. Everything you need is in GitHub: ticket labels, `factory-session:` comments, the `Factory log` issue. Do the tick, reply, stop.
-- **Your checkout is `ahdekkers/factory`** (the routine's source). Do not `git pull`; the prompts you are reading are already current. Read `repos.yml` and `factory.yml` from it.
+- **Your checkout is the factory repo** (the routine's source). Do not `git pull`; the prompts you are reading are already current. Read `repos.yml` and `factory.yml` from it.
 - **Attach each repo before touching it.** For every repo in `repos.yml`, call `add_repo` (owner, repo, `access: push`). If any call is refused or waits for approval, do not retry: finish the repos that did attach, and make your final message start with `ACTION: could not attach <repo>: <reason>`.
 - **GitHub is REST only.** GraphQL is blocked: `gh issue list`, `gh pr ...` and `gh label` fail. Use `gh api` as in `github.md` for every read and write (it is the same guide builders get). Read a repo's config with `gh api repos/<repo>/contents/.factory/config.yml -H 'Accept: application/vnd.github.raw'`.
 - **Starting sessions** works as in `controller.md` (`create_session` with environment, model, source, prompt). Sessions you start are your children; list them with `list_sessions` (`children: true`). Do not start a builder or planner for a repo if `add_repo` for it failed.
@@ -20,7 +20,7 @@ Besides the hourly schedule, a tick also starts when a `factory` issue is closed
 
 ## Pause
 
-Pause without touching the routine: if `ahdekkers/factory` has an open issue titled `Factory paused`, start nothing, change nothing, and reply `paused`. Close the issue to resume. (Disabling the routine also pauses it.)
+Pause without touching the routine: if the factory repo (this checkout's GitHub repo) has an open issue titled `Factory paused`, start nothing, change nothing, and reply `paused`. Close the issue to resume. (Disabling the routine also pauses it.)
 
 ## Notifying the owner
 

@@ -1,0 +1,55 @@
+# .github/workflows/deploy.yml — deploy on every merge to main, on a self-hosted runner on the machine that runs the app.
+# scripts/deploy.sh (see templates/deploy.sh) builds, migrates, restarts and smoke-tests; on failure it redeploys the
+# last good commit and this workflow opens a `factory` + `factory:incident` issue, which the controller hands to a builder.
+# Copied from the factory repo's templates/deploy.yml. Replace <runner-label>.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+# A newer commit waits behind the running deploy and replaces any older waiting one.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: [self-hosted, <runner-label>]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Builders merge often. If main has moved on, the newer commit's run deploys it; skip this one.
+      - name: Superseded?
+        id: gate
+        run: |
+          set -euo pipefail
+          git fetch -q origin main
+          if [ "$(git rev-parse origin/main)" != "$GITHUB_SHA" ]; then
+            echo "superseded by $(git rev-parse origin/main)"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy
+        id: deploy
+        if: steps.gate.outputs.skip != 'true'
+        timeout-minutes: 20   # under the job's limit, so a hang still reaches the incident step
+        run: scripts/deploy.sh
+
+      - name: Open incident
+        if: ${{ !cancelled() && steps.deploy.outcome == 'failure' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: scripts/deploy_incident.sh

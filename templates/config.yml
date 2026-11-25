@@ -1,4 +1,4 @@
-# .factory/config.yml — the repo's contract with the software factory (https://github.com/ahdekkers/factory)
+# .factory/config.yml — the repo's contract with the software factory (see the factory repo's README)
 repo: owner/name
 vision: VISION.md
 daily_ticket_cap: 50            # hard limit on tickets the planner creates per UTC day
@@ -10,7 +10,7 @@ checks:                         # every builder runs these; all must pass before
   - make test
 cloud_up: null                  # script that starts the app in a cloud session with demo data and prints its URL;
                                 # null until the bootstrap ticket creates it
-deploy_workflow: null           # e.g. deploy.yml; builders wait for it after merging
+deploy_workflow: null           # e.g. .github/workflows/deploy.yml (templates/deploy.yml); it rolls back and files incidents
 # models:                       # optional: override factory.yml's models for this repo
 #   builder: claude-opus-5-5    # e.g. for a repo where the changes are hard
 notes: |
