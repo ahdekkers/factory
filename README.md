@@ -79,6 +79,20 @@ The controller starts a planner only when one of these holds:
 
 When every criterion is met and no factory tickets are open, the planner posts `**Vision met**` with the `VISION.md` sha. The controller then stops planning for that repo and sends you one push notification. Editing `VISION.md` starts the loop again.
 
+### Event ticks: starting the controller when an issue closes
+
+A scheduled task does not only run on a timer. It can also be started by a GitHub event on a repo the Claude GitHub app can see, such as an issue being closed. The factory uses this as a second trigger on the same controller task: when a `factory` ticket closes in a product repo, a controller tick starts within a minute or so.
+
+**Why it is worth adding.** Merging a ticket closes it, and that can be the last blocker of other tickets, or the merge can free a builder slot. With only the hourly schedule, the next builder waits up to an hour. With the event, it starts right away. Over a vision of 20 or more tickets with dependencies, this cuts days to hours.
+
+**How an event tick behaves** (see `prompts/controller-cloud.md`):
+- It is a normal tick: the same steps and the same caps. If the event names the closed issue, the controller treats that as a hint only, and re-reads the queue.
+- It fires for every closed issue in the repo, including ones that are not `factory` tickets, and several can arrive within a minute (a builder's `ship.sh` closes the ticket as the PR merges). A **run-level lock** handles this: a tick that finds another controller tick still working, started in the last 10 minutes, replies `Nothing to report.` and stops. A **ticket-level lock** means two ticks can never dispatch the same ticket: relabel to `factory:building` first, then re-check for a `factory-session:` comment before starting a builder.
+- An extra tick that finds nothing to do costs a few Haiku turns.
+- The hourly schedule stays on as the safety net for anything an event misses.
+
+How to add it is in [`prompts/tick.md`](prompts/tick.md#adding-the-event-trigger).
+
 ### Verifying without real data
 
 Planners and builders never touch your real data. Each product repo has a `cloud_up` script that starts the app inside a cloud session with invented or recorded demo data, and prints its URL. Agents check their work there with Playwright: text measurements first (status codes, overflow, visible text), screenshots only where something must be judged by eye, at a phone viewport and at 1440×900. Things that only show up in production are caught by the deploy's own checks, which file incidents.
@@ -138,7 +152,7 @@ Planners and builders never touch your real data. Each product repo has a `cloud
    - the `Claude_Code_Remote` connector;
    - push notifications on.
 
-   Put its id (`trig_…`) in `factory.yml` as `controller_tick`. Optionally add a GitHub "issue closed" event on each product repo as a second trigger, so a closed blocker gets built without waiting for the hour.
+   Put its id (`trig_…`) in `factory.yml` as `controller_tick`. Then add a GitHub "issue closed" event trigger for each product repo to the same task (optional but recommended), so a closed blocker gets built without waiting for the hour: see [Event ticks](#event-ticks-starting-the-controller-when-an-issue-closes) and [`prompts/tick.md`](prompts/tick.md#adding-the-event-trigger).
 
 5. **Install the vision skill** on your computer: `mkdir -p ~/.claude/skills && cp -r skills/factory-vision ~/.claude/skills/`. If your clone isn't at `~/factory`, edit the path in the copied `SKILL.md`. After that, telling Claude Code "write a vision for <repo>", or anything like it, runs the interview.
 
@@ -174,7 +188,7 @@ Do this once per product repo. Steps 1–3 go in one PR.
 
 5. **Remove other automation** that acts on every new issue in the repo, or make it skip issues labelled `factory`.
 
-6. **Add the repo** to `repos.yml`. On the next tick, the controller creates the labels and the `Factory log` issue and starts the first planner.
+6. **Add the repo** to `repos.yml`, and add an "issue closed" event trigger for it to the controller task ([`prompts/tick.md`](prompts/tick.md#adding-the-event-trigger)). On the next tick, the controller creates the labels and the `Factory log` issue and starts the first planner.
 
 ## Day to day
 
