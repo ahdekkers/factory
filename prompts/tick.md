@@ -12,7 +12,7 @@ The controller runs as a claude.ai **scheduled task** (a "routine") that starts 
 | Each firing | creates a new session (stateless) |
 | Connectors | `Claude_Code_Remote` only (gives it `create_session`, `list_sessions`, `get_session`, `add_repo`, `archive_session`) |
 | Notifications | push on |
-| Optional event trigger | GitHub "issue closed" on each factory repo, so builders start as soon as a blocker closes. `controller-cloud.md` has the locks that make overlapping ticks safe. |
+| Event triggers (recommended) | GitHub **Issues → closed** on each product repo in `repos.yml` (not the factory repo), so builders start as soon as a ticket closes. See below. |
 
 ## Prompt
 
@@ -34,7 +34,24 @@ From any Claude Code session that has the remote-session tools (or the claude.ai
 
 > Create a scheduled task "Factory controller tick": cron `17 * * * *`, model claude-haiku-5-5, a new session on each firing, source repo `<owner>/factory`, environment `<cloud_environment from factory.yml>`, connector Claude_Code_Remote only, push notifications on, prompt: the text in `prompts/tick.md`.
 
-Then fire it once by hand and read the session it starts: it should list each repo and say what it did.
+Then fire it once by hand and read the session it starts: it should list each repo and say what it did. Then add the event triggers (next section).
+
+## Adding the event trigger
+
+A scheduled task can have GitHub event triggers as well as its cron schedule. Add one per product repo to the same `Factory controller tick` task. Don't create a second task: both kinds of firing should run the same prompt.
+
+1. Make sure the Claude GitHub app is installed on the product repo. Events only arrive from repos it can see.
+2. Open the task in claude.ai (Claude Code → scheduled tasks → `Factory controller tick` → edit), and add a trigger of type **GitHub event**.
+3. Pick the product repo (e.g. `<owner>/<product>`) and the event **Issues**, action **closed**. Leave out other actions: `opened` and `labeled` fire constantly while the planner files tickets, and need no controller action.
+4. Save, keeping the cron schedule as well. Repeat for each repo in `repos.yml`. When you onboard a new repo, add its trigger at the same time as its `repos.yml` line.
+
+The menu names may differ slightly from these. What matters is one trigger per repo for the issue-closed event, on the existing task.
+
+**What the session sees.** An event firing starts the same fresh Haiku session with the same prompt, plus the event payload. The prompt does not need changing: `controller-cloud.md` already says that an event tick is a normal tick, that the named issue is only a hint, and how the run-level and ticket-level locks work.
+
+**Checking it works.** Close any `factory` ticket in a product repo (or wait for a builder to merge one). Within a minute or two a new controller session should appear in the task's run history. Its reply is either `Nothing to report.` (another tick held the lock, or nothing was ready) or the usual five-line summary. If no session appears, the GitHub app probably cannot see that repo.
+
+**Cost.** Every closed issue in those repos starts a session, including your own non-factory issues. Ticks that find nothing to do, or find the lock held, stop after a few Haiku turns. If a repo has a lot of non-factory issue churn and that bothers you, leave its trigger off and rely on the hourly schedule.
 
 ## The other way: a long-lived controller on your Mac
 
